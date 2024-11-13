@@ -21,7 +21,7 @@ export class ClientService {
   }
 
   addCliente(cliente: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/clientes`, cliente);
+    return this.http.post<any>(`${this.apiUrl}`, cliente);
   }
 
   updateCliente(id: number, cliente: any): Observable<any> {
@@ -29,7 +29,7 @@ export class ClientService {
   }
 
   deleteCliente(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/clientes/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
   // Métodos para Direcciones

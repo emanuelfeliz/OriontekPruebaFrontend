@@ -1,34 +1,208 @@
 <div class="container mt-4">
-    <h2 class="text-center mb-4">Gestión de Clientes</h2>
-    <button class="btn btn-primary mb-3" >Agregar Cliente</button>
-  
-    <table class="table table-hover table-bordered">
-      <thead class="thead-dark">
-        <tr>
-          <th>ID</th>
-          <th>Nombre</th>
-          <th>Direcciones</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let cliente of clientes">
-          <td>{{ cliente.clienteId }}</td>
-          <td>{{ cliente.nombre }}</td>
-          <td>
-            <ul *ngIf="cliente.direcciones?.length">
-              <li *ngFor="let direccion of cliente.direcciones">
-                {{ direccion.calle }}, {{ direccion.ciudad }}, {{ direccion.estado }} - {{ direccion.codigoPostal }}
-              </li>
-            </ul>
-            <span *ngIf="!cliente.direcciones?.length">No tiene direcciones</span>
-          </td>
-          <td>
-            <button class="btn btn-warning btn-sm mr-2"  >Editar</button> &nbsp;
-            <button class="btn btn-danger btn-sm"  >Eliminar</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+  <h2 class="text-center mb-4">Gestión de Clientes</h2>
+  <button
+    class="btn btn-primary mb-3"
+    data-bs-toggle="modal"
+    data-bs-target="#staticBackdrop"
+  >
+    Agregar Cliente
+  </button>
+
+  <table class="table table-hover table-bordered">
+    <thead class="thead-dark">
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Direcciones</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let cliente of clientes">
+        <td>{{ cliente.clienteId }}</td>
+        <td>{{ cliente.nombre }}</td>
+        <td>
+          <ul *ngIf="cliente.direcciones?.length">
+            <li *ngFor="let direccion of cliente.direcciones">
+              {{ direccion.calle }}, {{ direccion.ciudad }},
+              {{ direccion.estado }} - {{ direccion.codigoPostal }}
+            </li>
+          </ul>
+          <span *ngIf="!cliente.direcciones?.length">No tiene direcciones</span>
+        </td>
+        <td>
+          <button class="btn btn-warning btn-sm mr-2">Editar</button> &nbsp;
+          <button class="btn btn-danger btn-sm"    (click)="openModal(cliente.clienteId)">Eliminar</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<!-- Modal -->
+<div
+  class="modal fade"
+  id="staticBackdrop"
+  data-bs-backdrop="static"
+  data-bs-keyboard="false"
+  tabindex="-1"
+  aria-labelledby="staticBackdropLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="staticBackdropLabel">Agregar Cliente</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="clienteForm" (ngSubmit)="onSubmit()">
+          <!-- Cliente -->
+          <div class="mb-3">
+            <label for="nombre" class="form-label">Nombre del Cliente</label>
+            <input
+              type="text"
+              id="nombre"
+              class="form-control"
+              formControlName="nombre"
+              placeholder="Ingrese el nombre del cliente"
+              required
+            />
+            <!-- Contenedor para mensajes de error -->
+            <div *ngFor="let error of errorMessage.nombre">
+              <div
+                id="emailHelp"
+                class="form-text text-danger"
+                *ngIf="
+                  nombre?.hasError(error.type) &&
+                  (nombre?.dirty || nombre?.touched)
+                "
+              >
+                {{ error.mensaje }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Direcciones -->
+          <div formArrayName="direcciones" *ngFor="let direccion of direcciones?.controls; let i = index" class="mb-3">
+            <div [formGroupName]="i">
+              <!-- Calle -->
+              <label for="calle-{{ i }}">Calle</label>
+              <input 
+                id="calle-{{ i }}" 
+                formControlName="calle" 
+                type="text" 
+                class="form-control" />
+              <div *ngFor="let error of errorMessage.calle">
+                <div 
+                  class="form-text text-danger" 
+                  *ngIf="getDireccionControl(i, 'calle')?.hasError(error.type) && 
+                         (getDireccionControl(i, 'calle')?.dirty || getDireccionControl(i, 'calle')?.touched)">
+                  {{ error.mensaje }}
+                </div>
+              </div>
+          
+              <!-- Ciudad -->
+              <label for="ciudad-{{ i }}">Ciudad</label>
+              <input 
+                id="ciudad-{{ i }}" 
+                formControlName="ciudad" 
+                type="text" 
+                class="form-control" />
+              <div *ngFor="let error of errorMessage.ciudad">
+                <div 
+                  class="form-text text-danger" 
+                  *ngIf="getDireccionControl(i, 'ciudad')?.hasError(error.type) && 
+                         (getDireccionControl(i, 'ciudad')?.dirty || getDireccionControl(i, 'ciudad')?.touched)">
+                  {{ error.mensaje }}
+                </div>
+              </div>
+          
+              <!-- Estado -->
+              <label for="estado-{{ i }}">Estado</label>
+              <input 
+                id="estado-{{ i }}" 
+                formControlName="estado" 
+                type="text" 
+                class="form-control" />
+              <div *ngFor="let error of errorMessage.estado">
+                <div 
+                  class="form-text text-danger" 
+                  *ngIf="getDireccionControl(i, 'estado')?.hasError(error.type) && 
+                         (getDireccionControl(i, 'estado')?.dirty || getDireccionControl(i, 'estado')?.touched)">
+                  {{ error.mensaje }}
+                </div>
+              </div>
+          
+              <!-- Código Postal -->
+              <label for="codigoPostal-{{ i }}">Código Postal</label>
+              <input 
+                id="codigoPostal-{{ i }}" 
+                formControlName="codigoPostal" 
+                type="text" 
+                value="null"
+                class="form-control" />
+              <div *ngFor="let error of errorMessage.codigoPostal">
+                <div 
+                  class="form-text text-danger" 
+                  *ngIf="getDireccionControl(i, 'codigoPostal')?.hasError(error.type) && 
+                         (getDireccionControl(i, 'codigoPostal')?.dirty || getDireccionControl(i, 'codigoPostal')?.touched)">
+                  {{ error.mensaje }}
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <button
+            type="button"
+            class="btn btn-success float-end mb-3"
+            (click)="addDireccion()"
+          >
+            Agregar Otra Dirección
+          </button>
+
+          <button type="submit" class="btn btn-primary mb-3" [disabled]="!clienteForm.valid">
+            Guardar Cliente
+          </button>
+        </form>
+
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary float-end"
+            data-bs-dismiss="modal"
+          >
+            Close modal
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
-  
+</div>
+
+<!-- Modal de confirmación -->
+<!-- Botón para abrir el modal -->
+
+<!-- Modal de confirmación -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteModalLabel">Confirmación de Eliminación</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>{{ confirmMessage }}</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" (click)="confirmDelete()" >Eliminar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
